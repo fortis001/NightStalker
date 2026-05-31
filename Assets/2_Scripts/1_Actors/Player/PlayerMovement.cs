@@ -5,15 +5,17 @@ namespace NightStalker.Actors.Player
 {
     public class PlayerMovement : MonoBehaviour
     {
-        [SerializeField] private Rigidbody2D _rigidbody;
-        [SerializeField] private float _moveSpeed = 3f;
+        [SerializeField] private float _walkSpeed = 1.5f;
 
+        private Rigidbody2D _rigidbody;
         private InGameTimeManager _timeManager;
 
         private Vector2 _moveInput;
+        private float _speedMultiplier = 1f;
 
-        public void Init(InGameTimeManager timeManager)
+        public void Init(Rigidbody2D rigidbody, InGameTimeManager timeManager)
         {
+            _rigidbody = rigidbody;
             _timeManager = timeManager;
         }
 
@@ -24,6 +26,11 @@ namespace NightStalker.Actors.Player
                 : moveInput;
         }
 
+        public void SetSpeedMultiplier(float multipiler)
+        {
+            _speedMultiplier = multipiler;
+        }
+
         private void FixedUpdate()
         {
             if (_timeManager == null)
@@ -32,9 +39,11 @@ namespace NightStalker.Actors.Player
             if (_moveInput.sqrMagnitude <= 0.0001f)
                 return;
 
+            float speed = _walkSpeed * _speedMultiplier;
+
             _rigidbody.MovePosition(
                 _rigidbody.position +
-                _moveInput * _moveSpeed * _timeManager.GameFixedDeltaTime
+                _moveInput * speed * _timeManager.GameFixedDeltaTime
             );
         }
     }

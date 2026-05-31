@@ -182,6 +182,7 @@ GameObject:
   - component: {fileID: 273587277}
   - component: {fileID: 273587276}
   - component: {fileID: 273587280}
+  - component: {fileID: 273587281}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -217,8 +218,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6ead112370c1414cacd4c11a5098161, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rigidbody: {fileID: 1459909854}
-  _moveSpeed: 3
+  _walkSpeed: 1.5
 --- !u!114 &273587277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f0f9081d841a974ca70a6c656903528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _movement: {fileID: 273587276}
+  _sprintMultiplier: 3
 --- !u!114 &273587278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,10 +256,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 294a5e4573713874fb09db30c13d5e84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _controller: {fileID: 273587277}
-  _movement: {fileID: 273587276}
-  _animator: {fileID: 273587278}
-  _interactor: {fileID: 273587280}
+  _playerController: {fileID: 273587277}
+  _playerMovement: {fileID: 273587276}
+  _playerAnimator: {fileID: 273587278}
+  _playerInteractor: {fileID: 273587280}
+  _playerStatus: {fileID: 273587281}
+  _rigidbody: {fileID: 1459909854}
+  _unityAnimator: {fileID: 1459909855}
 --- !u!114 &273587280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,6 +275,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6abe5590231cae4ab41e41ca5299a53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _controller: {fileID: 273587277}
+  _animator: {fileID: 273587278}
+--- !u!114 &273587281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 273587274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19e4dc7ed7891ff499f78aa53e990734, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxSprintGauge: 100
+  _sprintDrainPerSecond: 30
+  _sprintRecoverPerSecond: 20
+  _exhaustRecoverRatio: 0.3
 --- !u!1 &438941752
 GameObject:
   m_ObjectHideFlags: 0
@@ -500,6 +521,7 @@ GameObject:
   - component: {fileID: 1459909852}
   - component: {fileID: 1459909853}
   - component: {fileID: 1459909854}
+  - component: {fileID: 1459909855}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -566,12 +588,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 43c7cc95c31d8fa47abf572cfdc2b4cf, type: 3}
+  m_Sprite: {fileID: -652701760347150558, guid: 976d2ec4e882e1a4eae8b82f326b7dcc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.99, y: 1.49}
+  m_Size: {x: 1.28, y: 1.28}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -604,6 +626,28 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!95 &1459909855
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459909851}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 891cfe2c70918574e83919fd72862ef2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1861044160
 GameObject:
   m_ObjectHideFlags: 0

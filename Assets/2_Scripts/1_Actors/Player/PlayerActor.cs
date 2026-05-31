@@ -6,15 +6,29 @@ namespace NightStalker.Actors
 {
     public class PlayerActor : MonoBehaviour
     {
-        [SerializeField] private PlayerController _controller;
-        [SerializeField] private PlayerMovement _movement;
-        [SerializeField] private PlayerAnimator _animator;
-        [SerializeField] private PlayerInteractor _interactor;
+        [Header("Player Components")]
+        [SerializeField] private PlayerController _playerController;
+        [SerializeField] private PlayerMovement _playerMovement;
+        [SerializeField] private PlayerAnimator _playerAnimator;
+        [SerializeField] private PlayerInteractor _playerInteractor;
+        [SerializeField] private PlayerStatus _playerStatus;
+        [Header("Unity Components")]
+        [SerializeField] private Rigidbody2D _rigidbody;
+        [SerializeField] private Animator _unityAnimator;
+
 
         public void Init(InGameTimeManager timeManager)
         {
-            _controller.Init();
-            _movement.Init(timeManager);
+            _playerAnimator.Init(_unityAnimator);
+            _playerMovement.Init(_rigidbody, timeManager);
+            _playerInteractor.Init(_playerController, _playerAnimator);
+            _playerStatus.Init(timeManager, _playerController);
+            _playerController.Init(_playerMovement, _playerAnimator, _playerInteractor, _playerStatus);
+        }
+
+        public void Hit(Vector2 stalkerPosition)
+        {
+
         }
     }
 }
