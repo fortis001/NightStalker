@@ -4,6 +4,7 @@ namespace NightStalker.Actors
 {
     public enum ActorDirection
     {
+        None,
         Left,
         Right,
         Up,

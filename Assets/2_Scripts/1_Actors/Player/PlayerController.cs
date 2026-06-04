@@ -1,5 +1,4 @@
-using LSH.Core;
-using NightStalker.Core;
+using NightStalker.GamePlay.Entities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,7 +6,11 @@ namespace NightStalker.Actors.Player
 {
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] float _sprintMultiplier = 3f;
+        [SerializeField] private float _sprintMultiplier = 3f;
+
+        // Compared against Vector2.sqrMagnitude.
+        // 0.0001f means actual magnitude deadzone is 0.01f.
+        [SerializeField] private float _inputDeadzoneSqr = 0.0001f;
 
         private PlayerMovement _movement;
         private PlayerAnimator _animator;
@@ -15,81 +18,133 @@ namespace NightStalker.Actors.Player
         private PlayerStatus _status;
 
         private InputAction _moveAction;
-
-        private InputAction _interactAction;
         private InputAction _sprintAction;
 
-        private bool _isMovable = true;
-        private bool _isRepairing = false;
+        private bool _isControlLocked;
+        private bool _isInteracting;
+
         private ActorDirection _direction;
         private PlayerMoveState _moveState;
+        private InteractionControlMode _interactionControlMode;
 
         public ActorDirection Direction => _direction;
         public PlayerMoveState MoveState => _moveState;
+        public InteractionControlMode InteractionControlMode => _interactionControlMode;
 
-        public void Init(PlayerMovement movement, PlayerAnimator animator, PlayerInteractor interactor, PlayerStatus status)
+        public void Init(PlayerMovement movement, PlayerAnimator animator, PlayerInteractor interactor, PlayerStatus status, InputAction moveAction, InputAction sprintAction)
         {
             _movement = movement;
             _animator = animator;
             _interactor = interactor;
             _status = status;
 
-            _moveAction = InputManager.Instance.GetAction(InputActionName.Move);
-            _interactAction = InputManager.Instance.GetAction(InputActionName.Interact);
-            _sprintAction = InputManager.Instance.GetAction(InputActionName.Sprint);
-
-            _interactAction.performed -= HandleInteractKeyPressed;
-            _interactAction.performed += HandleInteractKeyPressed;
+            _moveAction = moveAction;
+            _sprintAction = sprintAction;
 
             _direction = ActorDirection.Down;
             _moveState = PlayerMoveState.Idle;
+
             SetMoveState(_moveState, _direction);
         }
 
         private void Update()
         {
-            if (!_isMovable)
+            if (_isControlLocked)
             {
-                _movement.SetMoveInput(Vector2.zero);
+                StopMovementInput();
                 return;
             }
 
-            Vector2 moveInput = _moveAction.ReadValue<Vector2>();
+            Vector2 moveInput = ReadMoveInput(out bool hasMoveInput);
 
-            if (_isRepairing)
+            if (_isInteracting)
             {
-                if (moveInput.sqrMagnitude > 0.0001f)
-                {
-                    _interactor.StopRepair();
-                }
-                else
-                {
-                    _movement.SetMoveInput(Vector2.zero);
+                if (!hasMoveInput)
                     return;
-                }
+
+                // Contract:
+                // Movement-cancellable interactions are expected to release control immediately.
+                // If cancel can keep control locked or play a cancel animation later,
+                // this method should return whether movement may continue this frame.
+                RequestInteractionCancelByMovement();
             }
 
-            if (moveInput.sqrMagnitude > 1f)
+            ApplyMoveInput(moveInput, hasMoveInput);
+        }
+
+        public void SetInteractionControlMode(InteractionControlMode mode)
+        {
+            _interactionControlMode = mode;
+
+            switch (mode)
+            {
+                case InteractionControlMode.None:
+                    _isControlLocked = false;
+                    _isInteracting = false;
+                    break;
+
+                case InteractionControlMode.Cancellable:
+                    _isControlLocked = false;
+                    _isInteracting = true;
+                    StopMovement();
+                    break;
+
+                case InteractionControlMode.InteractionOnly:
+                case InteractionControlMode.ControlLocked:
+                    _isControlLocked = true;
+                    _isInteracting = true;
+                    StopMovement();
+                    break;
+
+                default:
+                    Debug.LogWarning($"Unhandled interaction control mode: {mode}");
+                    _interactionControlMode = InteractionControlMode.None;
+                    _isControlLocked = false;
+                    _isInteracting = false;
+                    StopMovement();
+                    break;
+            }
+        }
+
+        private Vector2 ReadMoveInput(out bool hasMoveInput)
+        {
+            Vector2 moveInput = _moveAction.ReadValue<Vector2>();
+
+            float sqrMag = moveInput.sqrMagnitude;
+            if (sqrMag > 1f)
+            {
                 moveInput.Normalize();
+                sqrMag = 1f;
+            }
 
-            ActorDirection nextDirection = _direction;
+            hasMoveInput = sqrMag > _inputDeadzoneSqr;
+            return moveInput;
+        }
 
-            if (moveInput.sqrMagnitude > 0.0001f)
-                nextDirection = GetDirection(moveInput);
+        private void ApplyMoveInput(Vector2 moveInput, bool hasMoveInput)
+        {
+            ActorDirection nextDirection = hasMoveInput
+                ? GetDirection(moveInput)
+                : _direction;
 
-            PlayerMoveState nextState;
-
-            if (moveInput.sqrMagnitude <= 0.0001f)
-                nextState = PlayerMoveState.Idle;
-            else if (_sprintAction.IsPressed() && _status.CanSprint)
-                nextState = PlayerMoveState.Sprint;
-            else
-                nextState = PlayerMoveState.Walk;
+            PlayerMoveState nextState = GetMoveState(hasMoveInput);
 
             SetMoveState(nextState, nextDirection);
 
             _movement.SetMoveInput(moveInput);
-            _movement.SetSpeedMultiplier(nextState == PlayerMoveState.Sprint ? _sprintMultiplier : 1f);
+            _movement.SetSpeedMultiplier(
+                nextState == PlayerMoveState.Sprint ? _sprintMultiplier : 1f);
+        }
+
+        private PlayerMoveState GetMoveState(bool hasMoveInput)
+        {
+            if (!hasMoveInput)
+                return PlayerMoveState.Idle;
+
+            if (_sprintAction.IsPressed() && _status.CanSprint)
+                return PlayerMoveState.Sprint;
+
+            return PlayerMoveState.Walk;
         }
 
         private ActorDirection GetDirection(Vector2 input)
@@ -141,26 +196,23 @@ namespace NightStalker.Actors.Player
             _animator.Play(animationState, _direction);
         }
 
-        public void SetRepairing(bool state)
+        private void RequestInteractionCancelByMovement()
         {
-            _isRepairing = state;
+            _interactor.Interact();
         }
 
-        public void SetMovable(bool state)
+        private void StopMovement()
         {
-            _isMovable = state;
+            _moveState = PlayerMoveState.Idle;
+            _movement.SetMoveInput(Vector2.zero);
+            _movement.SetSpeedMultiplier(1f);
         }
 
-        private void HandleInteractKeyPressed(InputAction.CallbackContext context)
+        private void StopMovementInput()
         {
-
+            _movement.SetMoveInput(Vector2.zero);
         }
 
-        private void OnDestroy()
-        {
-            if (InputManager.Instance == null) return;
-            _interactAction.performed -= HandleInteractKeyPressed;
-        }
     }
 }
 

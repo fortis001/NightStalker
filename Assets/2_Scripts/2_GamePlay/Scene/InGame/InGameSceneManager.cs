@@ -1,6 +1,7 @@
 using LSH.Core;
 using NightStalker.Actors;
 using NightStalker.Core;
+using NightStalker.GamePlay.Entities;
 using UnityEngine;
 
 namespace NightStalker.GamePlay.InGame
@@ -14,11 +15,13 @@ namespace NightStalker.GamePlay.InGame
         [SerializeField] InputManager _testInputManager;
         [SerializeField] TimeManager _testTimeManager;
         [SerializeField] BootstrapContext _testContext;
+        [SerializeField] PowerGenerator _powerGenerator;
 
         void Start()
         {
             _testInputManager.Init();
             _testInputManager.SetActionMap(InputMapName.InGame);
+            _powerGenerator.Init(_timeManager);
 
             _testTimeManager.Init(_testContext);
             _player.Init(_timeManager);

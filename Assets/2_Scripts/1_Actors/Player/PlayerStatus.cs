@@ -83,6 +83,7 @@ namespace NightStalker.Actors.Player
                 SprintGauge >= _maxSprintGauge * _exhaustRecoverRatio)
             {
                 _isExhausted = false;
+                OnSprintRecovered?.Invoke();
             }
         }
 

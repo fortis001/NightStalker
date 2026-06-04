@@ -31,6 +31,11 @@ namespace NightStalker.Actors.Player
             _speedMultiplier = multipiler;
         }
 
+        public void SnapTo(Vector2 snapPosition)
+        {
+            _rigidbody.position = snapPosition;
+        }
+
         private void FixedUpdate()
         {
             if (_timeManager == null)
