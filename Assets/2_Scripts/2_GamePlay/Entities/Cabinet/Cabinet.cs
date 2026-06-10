@@ -8,7 +8,7 @@ namespace NightStalker.GamePlay.Entities
     public class Cabinet : MonoBehaviour, IInteractable
     {
         [Header("InteractLocalPoint")]
-        [SerializeField] Vector2 _interactPoint = new Vector2(0f, 0f);
+        [SerializeField] Vector2 _interactPoint = new Vector2(0f, -0.5f);
 
         [Header("FocusAnimation")]
         [SerializeField] private InteractableFocusView _animation;
@@ -68,6 +68,8 @@ namespace NightStalker.GamePlay.Entities
         {
             Vector2 interactPosition = transform.TransformPoint(_interactPoint);
 
+            _occupiedActor.ExitCabinet();
+
             InteractionContext context = new InteractionContext(
                 interactPosition,
                 InteractionFlow.Transition,
@@ -116,14 +118,15 @@ namespace NightStalker.GamePlay.Entities
 
             if (_isOccupied)
             {
-                actor.ExitCabinet();
                 _isOccupied = false;
                 _occupiedActor = null;
+                _animation.Play();
             }
             else
             {
                 actor.EnterCabinet();
                 _isOccupied = true;
+                _animation.Stop();
             }
         }
 

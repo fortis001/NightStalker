@@ -38,6 +38,7 @@ namespace NightStalker.Actors.Player
             _currentState = state;
             _currentDirection = direction;
 
+            Debug.Log(stateName);
             _animator.Play(stateName);
         }
 
