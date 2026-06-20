@@ -3,20 +3,20 @@ using System.Collections;
 using NightStalker.GamePlay.InGame;
 using UnityEngine;
 
-namespace NightStalker.Actors.Player
+namespace NightStalker.Actors.Stalker
 {
-    public class PlayerAnimator : MonoBehaviour
+    public class StalkerAnimator : MonoBehaviour
     {
         private Animator _animator;
         private InGameTimeManager _timeManager;
 
         private string _currentStateName;
-        private PlayerAnimationState _currentState;
+        private StalkerAnimationState _currentState;
         private ActorDirection _currentDirection;
 
         private Coroutine _animationFinishRoutine;
 
-        public event Action<PlayerAnimationState> OnAnimationFinished;
+        public event Action<StalkerAnimationState> OnAnimationFinished;
 
         public void Init(Animator animator, InGameTimeManager timeManager)
         {
@@ -24,9 +24,9 @@ namespace NightStalker.Actors.Player
             _timeManager = timeManager;
         }
 
-        public void Play(PlayerAnimationState state, ActorDirection direction)
+        public void Play(StalkerAnimationState state, ActorDirection direction)
         {
-            if (state == PlayerAnimationState.None)
+            if (state == StalkerAnimationState.None)
                 return;
 
             string stateName = $"{state}_{direction}";
@@ -41,9 +41,9 @@ namespace NightStalker.Actors.Player
             _animator.Play(stateName);
         }
 
-        public void PlayAndNotifyFinished(PlayerAnimationState state, ActorDirection direction)
+        public void PlayAndNotifyFinished(StalkerAnimationState state, ActorDirection direction)
         {
-            if (state == PlayerAnimationState.None)
+            if (state == StalkerAnimationState.None)
                 return;
 
             Play(state, direction);
@@ -58,7 +58,7 @@ namespace NightStalker.Actors.Player
                 WaitAnimationFinishedRoutine(state, direction));
         }
 
-        private IEnumerator WaitAnimationFinishedRoutine(PlayerAnimationState animationState, ActorDirection direction)
+        private IEnumerator WaitAnimationFinishedRoutine(StalkerAnimationState animationState, ActorDirection direction)
         {
             if (_animator == null || _timeManager == null)
                 yield break;
@@ -90,7 +90,6 @@ namespace NightStalker.Actors.Player
             _animationFinishRoutine = null;
             OnAnimationFinished?.Invoke(animationState);
         }
-
     }
 }
 

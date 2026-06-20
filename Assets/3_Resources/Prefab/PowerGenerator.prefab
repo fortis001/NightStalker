@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9200228195578126551}
   - component: {fileID: 5311673066105283152}
   - component: {fileID: 5601638721204581572}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -153,7 +153,7 @@ GameObject:
   - component: {fileID: 1015568934158233365}
   - component: {fileID: 9194683971031053980}
   - component: {fileID: 7325696207077037700}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: PowerGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}

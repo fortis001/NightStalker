@@ -22,7 +22,12 @@ namespace NightStalker.Actors
         [SerializeField] private Animator _unityAnimator;
         [SerializeField] private SpriteRenderer _spriteRenderer;
 
+
+        public bool IsHidden { get; private set; }
+
         public event Action<PlayerAnimationState> OnAnimationFinished;
+        public event Action OnEnteredCabinet;
+        public event Action OnExitCabinet;
 
         public void Init(InGameTimeManager timeManager)
         {
@@ -49,12 +54,16 @@ namespace NightStalker.Actors
         {
             _collider.enabled = false;
             _spriteRenderer.enabled = false;
+            IsHidden = true;
+            OnEnteredCabinet?.Invoke();
         }
 
         public void ExitCabinet()
         {
             _collider.enabled = true;
             _spriteRenderer.enabled = true;
+            IsHidden = false;
+            OnExitCabinet?.Invoke();
         }
 
         private void HandleAnimationFinished(PlayerAnimationState animationState)

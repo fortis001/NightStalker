@@ -38,8 +38,25 @@ namespace NightStalker.Actors
         Crouch,
         Die,
     }
+    public enum StalkerState
+    {
+        None,
+        Standing,
+        Patrol,
+        Stalking,
+        Chasing,
+        Attacking,
+    }
+    public enum StalkerAnimationState
+    {
+        None,
+        Idle,
+        Walk,
+        Run,
+        Attack,
+    }
 
-    public static class PlayerAnimationStateMapper
+    public static class AnimationStateMapper
     {
         public static PlayerAnimationState ToAnimationState(this PlayerMoveState moveState)
         {
@@ -49,6 +66,19 @@ namespace NightStalker.Actors
                 PlayerMoveState.Walk => PlayerAnimationState.Walk,
                 PlayerMoveState.Sprint => PlayerAnimationState.Sprint,
                 _ => PlayerAnimationState.None
+            };
+        }
+
+        public static StalkerAnimationState ToAnimationState(this StalkerState moveState)
+        {
+            return moveState switch
+            {
+                StalkerState.Standing => StalkerAnimationState.Idle,
+                StalkerState.Patrol => StalkerAnimationState.Walk,
+                StalkerState.Stalking => StalkerAnimationState.Walk,
+                StalkerState.Chasing => StalkerAnimationState.Run,
+                StalkerState.Attacking => StalkerAnimationState.Attack,
+                _ => StalkerAnimationState.None
             };
         }
     }

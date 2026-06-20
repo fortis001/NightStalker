@@ -11,12 +11,12 @@ TagManager:
   - Ground
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Stalker
+  - StalkerSensor
+  - Evidence
+  - Interactable
+  - Wall
   - 
   - 
   - 
